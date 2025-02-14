@@ -26,5 +26,5 @@ private:
 
     void generateProblems();
     void renderProblemOptions(); // 根据题型渲染对应的选项
-    void openFileDialog(); // 打开文件对话框选择文件路径
+    void openFileDialog();       // 打开文件对话框选择文件路径
 };

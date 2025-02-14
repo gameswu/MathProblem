@@ -1,5 +1,4 @@
 // file.h
-// 生成题目输出为txt文件
 #pragma once
 
 #include "problem.h"
@@ -9,7 +8,7 @@
 class File
 {
 public:
-    File(std::vector<Problem *> problems, std::string fileName, int numProblems, bool needAnswer);
+    File(std::vector<Problem *> problems, std::string fileName, int numProblems, bool needAnswer, int fileFormat);
     void generateFile();
 
 private:
@@ -17,4 +16,5 @@ private:
     std::string fileName;
     int numProblems = 100;
     bool needAnswer = false;
+    int fileFormat = 0; // 0: UnicodeMath, 1: LaTeX
 };

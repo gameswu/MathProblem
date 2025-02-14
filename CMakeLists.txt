@@ -31,6 +31,8 @@ add_executable(MathProblem WIN32
     include/problem.cpp
     include/file.cpp
     include/gui.cpp
+    include/log.cpp
+    include/utils.cpp
     ${IMGUI_SRC}
 )
 

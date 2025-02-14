@@ -1,3 +1,5 @@
 build
 *.ini
 .vscode
+**.txt
+**.log

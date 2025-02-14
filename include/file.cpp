@@ -2,12 +2,13 @@
 
 #include <fstream>
 
-File::File(std::vector<Problem *> problems, std::string fileName, int numProblems, bool needAnswer)
+File::File(std::vector<Problem *> problems, std::string fileName, int numProblems, bool needAnswer, int fileFormat)
 {
     this->problems = problems;
     this->fileName = fileName;
     this->numProblems = numProblems;
     this->needAnswer = needAnswer;
+    this->fileFormat = fileFormat;
 }
 
 void File::generateFile()
@@ -22,7 +23,11 @@ void File::generateFile()
         file << problems[i]->getProblem();
         if (needAnswer)
         {
-            file << problems[i]->getAnswer() << std::endl;
+            file << problems[i]->getAnswer();
+        }
+        if (this->fileFormat == 1)
+        {
+            file << " \\\\" << std::endl;
         }
         else
         {

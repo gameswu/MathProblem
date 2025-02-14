@@ -1,5 +1,6 @@
 #include "gui.h"
 #include "file.h"
+#include "log.h"
 #include <vector>
 #include <string>
 #include <memory>
@@ -11,6 +12,7 @@ GUI::GUI()
 {
     problemTypes.push_back("无");
     problemTypes.push_back("加减法");
+    problemTypes.push_back("乘除法");
     // 可以添加更多题型
 
     outputFormats.push_back("UnicodeMath");
@@ -62,6 +64,10 @@ void GUI::render()
         else if (selectedProblemType == 1)
         {
             currentProblem = std::make_unique<AddSubProblem>(2, 100, 200, 0, selectedFormat);
+        }
+        else if (selectedProblemType == 2)
+        {
+            currentProblem = std::make_unique<MulDivProblem>(0, 2, 2, selectedFormat);
         }
         else
         {
@@ -117,6 +123,40 @@ void GUI::renderProblemOptions()
             ImGui::InputInt("结果最大值", &addSubProblem->maxRes);
             ImGui::InputInt("结果最小值", &addSubProblem->minRes);
         }
+        else if (auto mulDivProblem = dynamic_cast<MulDivProblem *>(currentProblem.get()))
+        {
+            bool isDiv = mulDivProblem->flags & MulDivProblem::IS_DIV;
+            if (ImGui::Checkbox("是否为除法题目", &isDiv))
+            {
+                if (isDiv)
+                {
+                    mulDivProblem->flags |= MulDivProblem::IS_DIV;
+                }
+                else
+                {
+                    mulDivProblem->flags &= ~MulDivProblem::IS_DIV;
+                }
+            }
+
+            if (mulDivProblem->flags & MulDivProblem::IS_DIV)
+            {
+                bool hasRemainder = mulDivProblem->flags & MulDivProblem::HAS_REM;
+                if (ImGui::Checkbox("是否带余数", &hasRemainder))
+                {
+                    if (hasRemainder)
+                    {
+                        mulDivProblem->flags |= MulDivProblem::HAS_REM;
+                    }
+                    else
+                    {
+                        mulDivProblem->flags &= ~MulDivProblem::HAS_REM;
+                    }
+                }
+            }
+
+            ImGui::InputInt("第一个数的位数", &mulDivProblem->firstDigits);
+            ImGui::InputInt("第二个数的位数", &mulDivProblem->secondDigits);
+        }
         // 可以添加更多题型的选项渲染逻辑
     }
 }
@@ -138,10 +178,17 @@ void GUI::generateProblems()
                                                  dynamic_cast<AddSubProblem *>(currentProblem.get())->minRes,
                                                  selectedFormat));
         }
+        else if (selectedProblemType == 2)
+        {
+            problems.push_back(new MulDivProblem(dynamic_cast<MulDivProblem *>(currentProblem.get())->flags,
+                                                 dynamic_cast<MulDivProblem *>(currentProblem.get())->firstDigits,
+                                                 dynamic_cast<MulDivProblem *>(currentProblem.get())->secondDigits,
+                                                 selectedFormat));
+        }
         // 可以添加更多题型的生成逻辑
     }
 
-    File file(problems, filePath, numProblems, needAnswer);
+    File file(problems, filePath, numProblems, needAnswer, selectedFormat);
     file.generateFile();
 
     // 清理内存
@@ -149,6 +196,7 @@ void GUI::generateProblems()
     {
         delete problem;
     }
+    Logger::getInstance().log(std::to_string(numProblems) + " Problems of Type " + std::to_string(selectedProblemType) + " has been written into " + filePath + " in Format " + std::to_string(selectedFormat), INFO);
 }
 
 void GUI::openFileDialog()
