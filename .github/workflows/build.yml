@@ -28,8 +28,7 @@ jobs:
 
     - name: Build
       run: |
-        $cpu_count = (Get-WmiObject -Class Win32_Processor | Measure-Object -Property NumberOfLogicalProcessors -Sum).Sum
-        cmake --build . --config Release -- -j $cpu_count
+        cmake --build . --config Release
 
     - name: Run tests
       run: ctest --output-on-failure --config Release
