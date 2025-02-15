@@ -18,7 +18,7 @@ void glfw_error_callback(int error, const char *description)
 
 void checkForUpdates()
 {
-    std::string repo = "your-username/your-repo";
+    std::string repo = "gameswu/MathProblem";
     std::string latestVersion;
 
     if (Updater::checkForUpdates(repo, latestVersion))
