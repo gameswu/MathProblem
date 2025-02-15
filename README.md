@@ -2,6 +2,8 @@
 
 这是一个用于练习算术的小程序，可以生成一些算术题目并支持`.txt`和`.md`格式语法的输出。
 
+![Build Status](https://github.com/gameswu/MathProblem/actions/workflows/build.yml/badge.svg)
+
 ## 从源码构建
 
 ### 环境要求
@@ -17,6 +19,7 @@
 依赖于以下库：
 - `Dear ImGui`图形库，版本`1.91.8`
 - `glfw`窗口库，版本`3.4`
+- `jsoncpp`数据解析库，版本`1.9.6`
 
 ### 构建步骤
 cmake正常配置即可，并使用`MinGW Makefiles`构建工具进行构建。
@@ -48,7 +51,7 @@ cmake --build .
 - [ ] 支持清除日志与缓存文件
 - [ ] 中文字符支持
 - [ ] 多语言界面支持
-- [ ] 基于github的更新检查
+- [x] 基于github的更新检查
 
 ### 改善与优化
 - [ ] 支持大数运算与高精度计算

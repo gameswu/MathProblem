@@ -1,0 +1,40 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Set up CMake
+      uses: jwlawson/actions-setup-cmake@v1.14
+      with:
+        cmake-version: 3.30.4
+
+    - name: Set up MinGW
+      uses: egor-tensin/setup-mingw@v1
+      with:
+        platform: x64
+
+    - name: Configure CMake
+      run: cmake -G "MinGW Makefiles" .
+
+    - name: Build
+      run: |
+        $cpu_count = (Get-WmiObject -Class Win32_Processor | Measure-Object -Property NumberOfLogicalProcessors -Sum).Sum
+        cmake --build . -- -j $cpu_count
+
+    - name: Run tests
+      run: ctest --output-on-failure
