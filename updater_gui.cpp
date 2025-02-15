@@ -1,18 +1,50 @@
-#define GLFW_EXPOSE_NATIVE_WIN32
-
-#include "gui.h"
+#include "updater/update.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include <GLFW/glfw3.h>
-#include <GLFW/glfw3native.h>
 #include <iostream>
-#include <windows.h>
-#include "resource.h"
+#include <thread>
+#include <atomic>
+
+std::atomic<bool> isUpdating(false);
+std::atomic<float> progress(0.0f);
+std::string updateStatus = "Checking for updates...";
 
 void glfw_error_callback(int error, const char *description)
 {
     std::cerr << "GLFW Error " << error << ": " << description << std::endl;
+}
+
+void checkForUpdates()
+{
+    std::string repo = "your-username/your-repo";
+    std::string latestVersion;
+
+    if (Updater::checkForUpdates(repo, latestVersion))
+    {
+        updateStatus = "Latest version: " + latestVersion;
+        std::string downloadUrl = "https://github.com/" + repo + "/releases/download/" + latestVersion + "/MathProblem.exe";
+        std::string outputPath = "MathProblem_Update.exe";
+
+        isUpdating = true;
+        std::thread downloadThread([downloadUrl, outputPath]()
+                                   {
+            if (Updater::downloadUpdate(downloadUrl, outputPath))
+            {
+                updateStatus = "Update downloaded successfully to " + outputPath;
+            }
+            else
+            {
+                updateStatus = "Failed to download update.";
+            }
+            isUpdating = false; });
+        downloadThread.detach();
+    }
+    else
+    {
+        updateStatus = "Failed to check for updates.";
+    }
 }
 
 int main(int, char **)
@@ -30,22 +62,13 @@ int main(int, char **)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // 创建窗口
-    GLFWwindow *window = glfwCreateWindow(1600, 900, "琪露诺的完美算术教室", nullptr, nullptr);
+    GLFWwindow *window = glfwCreateWindow(800, 600, "Updater", nullptr, nullptr);
     if (window == nullptr)
         return -1;
 
     glfwMakeContextCurrent(window);
     glfwFocusWindow(window);
     glfwSwapInterval(1); // Enable vsync
-
-    // 设置窗口图标
-    HICON hIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_APP_ICON));
-    if (hIcon)
-    {
-        HWND hwnd = glfwGetWin32Window(window);
-        SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
-        SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
-    }
 
     // 初始化imgui
     IMGUI_CHECKVERSION();
@@ -56,26 +79,13 @@ int main(int, char **)
     // 设置imgui样式
     ImGui::StyleColorsDark();
 
-    // 加载中文字体
-    HRSRC hRes = FindResource(NULL, MAKEINTRESOURCE(IDR_FONT1), RT_FONT);
-    HGLOBAL hMem = NULL;
-    if (hRes)
-    {
-        hMem = LoadResource(NULL, hRes);
-        if (hMem)
-        {
-            void *pFontData = LockResource(hMem);
-            DWORD fontSize = SizeofResource(NULL, hRes);
-            io.Fonts->AddFontFromMemoryTTF(pFontData, fontSize, 18.0f, NULL, io.Fonts->GetGlyphRangesChineseFull());
-        }
-    }
-
     // 初始化imgui for GLFW and OpenGL3
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 130");
 
-    // 创建GUI对象
-    GUI gui;
+    // 检查更新
+    std::thread checkThread(checkForUpdates);
+    checkThread.detach();
 
     // 主循环
     while (!glfwWindowShouldClose(window))
@@ -88,7 +98,16 @@ int main(int, char **)
         ImGui::NewFrame();
 
         // 渲染GUI
-        gui.render();
+        ImGui::Begin("Updater");
+
+        ImGui::Text("%s", updateStatus.c_str());
+
+        if (isUpdating)
+        {
+            ImGui::ProgressBar(progress, ImVec2(0.0f, 0.0f));
+        }
+
+        ImGui::End();
 
         // 渲染
         ImGui::Render();
@@ -110,12 +129,6 @@ int main(int, char **)
 
     glfwDestroyWindow(window);
     glfwTerminate();
-
-    // 释放资源
-    if (hMem)
-    {
-        FreeResource(hMem);
-    }
 
     return 0;
 }
