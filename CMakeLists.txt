@@ -46,7 +46,7 @@ add_executable(MathProblem WIN32
 )
 
 # 添加Updater GUI的构建配置
-add_executable(Updater_GUI
+add_executable(Updater_GUI WIN32
     updater_gui.cpp
     updater/update.cpp
     ${IMGUI_SRC}

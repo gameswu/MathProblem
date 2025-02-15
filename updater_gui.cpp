@@ -6,10 +6,13 @@
 #include <iostream>
 #include <thread>
 #include <atomic>
+#include <windows.h>
 
 std::atomic<bool> isUpdating(false);
 std::atomic<float> progress(0.0f);
 std::string updateStatus = "Checking for updates...";
+char proxy[256] = "127.0.0.1:7890";
+int retries = 1;
 
 void glfw_error_callback(int error, const char *description)
 {
@@ -21,16 +24,16 @@ void checkForUpdates()
     std::string repo = "gameswu/MathProblem";
     std::string latestVersion;
 
-    if (Updater::checkForUpdates(repo, latestVersion))
+    if (Updater::checkForUpdates(repo, latestVersion, proxy, retries))
     {
         updateStatus = "Latest version: " + latestVersion;
-        std::string downloadUrl = "https://github.com/" + repo + "/releases/download/" + latestVersion + "/MathProblem.exe";
-        std::string outputPath = "MathProblem_Update.exe";
+        std::string downloadUrl = "https://github.com/" + repo + "/releases/download/" + latestVersion + "/" + latestVersion + ".zip";
+        std::string outputPath = latestVersion + ".zip";
 
         isUpdating = true;
         std::thread downloadThread([downloadUrl, outputPath]()
                                    {
-            if (Updater::downloadUpdate(downloadUrl, outputPath))
+            if (Updater::downloadUpdate(downloadUrl, outputPath, proxy, retries))
             {
                 updateStatus = "Update downloaded successfully to " + outputPath;
             }
@@ -49,6 +52,10 @@ void checkForUpdates()
 
 int main(int, char **)
 {
+    // 隐藏命令行窗口
+    HWND hwnd = GetConsoleWindow();
+    ShowWindow(hwnd, SW_HIDE);
+
     // 设置GLFW错误回调
     glfwSetErrorCallback(glfw_error_callback);
 
@@ -105,6 +112,14 @@ int main(int, char **)
         if (isUpdating)
         {
             ImGui::ProgressBar(progress, ImVec2(0.0f, 0.0f));
+        }
+
+        ImGui::InputText("proxy", proxy, sizeof(proxy));
+
+        if (ImGui::Button("Retry"))
+        {
+            std::thread retryThread(checkForUpdates);
+            retryThread.detach();
         }
 
         ImGui::End();
