@@ -19,14 +19,12 @@ jobs:
         submodules: true
 
     - name: Set up CMake
-      uses: jwlawson/actions-setup-cmake@v1.14
+      uses: jwlawson/actions-setup-cmake@v2
       with:
         cmake-version: 3.30.4
 
     - name: Set up MinGW
-      uses: egor-tensin/setup-mingw@v1
-      with:
-        platform: x64
+      uses: egor-tensin/setup-mingw@v2
 
     - name: Configure CMake
       run: cmake -G "MinGW Makefiles" .
