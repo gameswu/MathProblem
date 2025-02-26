@@ -4,11 +4,11 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "resource.h"
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 #include <iostream>
 #include <windows.h>
-#include "resource.h"
 
 void glfw_error_callback(int error, const char *description)
 {
@@ -57,18 +57,7 @@ int main(int, char **)
     ImGui::StyleColorsDark();
 
     // 加载中文字体
-    HRSRC hRes = FindResource(NULL, MAKEINTRESOURCE(IDR_FONT1), RT_FONT);
-    HGLOBAL hMem = NULL;
-    if (hRes)
-    {
-        hMem = LoadResource(NULL, hRes);
-        if (hMem)
-        {
-            void *pFontData = LockResource(hMem);
-            DWORD fontSize = SizeofResource(NULL, hRes);
-            io.Fonts->AddFontFromMemoryTTF(pFontData, fontSize, 18.0f, NULL, io.Fonts->GetGlyphRangesChineseFull());
-        }
-    }
+    io.Fonts->AddFontFromFileTTF("assets/fonts/msyh.ttc", 18.0f, NULL, io.Fonts->GetGlyphRangesChineseFull());
 
     // 初始化imgui for GLFW and OpenGL3
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -87,13 +76,19 @@ int main(int, char **)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+        // 设置窗口大小和位置与Win窗口一致
+        int display_w, display_h;
+        glfwGetFramebufferSize(window, &display_w, &display_h);
+        ImGui::SetNextWindowSize(ImVec2(display_w, display_h));
+        ImGui::SetNextWindowPos(ImVec2(0, 0));
+
         // 渲染GUI
+        ImGui::Begin("Main Window", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
         gui.render();
+        ImGui::End();
 
         // 渲染
         ImGui::Render();
-        int display_w, display_h;
-        glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
         glClearColor(0.45f, 0.55f, 0.60f, 1.00f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -110,12 +105,6 @@ int main(int, char **)
 
     glfwDestroyWindow(window);
     glfwTerminate();
-
-    // 释放资源
-    if (hMem)
-    {
-        FreeResource(hMem);
-    }
 
     return 0;
 }

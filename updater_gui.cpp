@@ -1,8 +1,11 @@
+#define GLFW_EXPOSE_NATIVE_WIN32
+
 #include "updater/update.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
 #include <iostream>
 #include <thread>
 #include <atomic>
@@ -104,6 +107,12 @@ int main(int, char **)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+        // 设置窗口大小和位置与Win窗口一致
+        int display_w, display_h;
+        glfwGetFramebufferSize(window, &display_w, &display_h);
+        ImGui::SetNextWindowSize(ImVec2(display_w, display_h));
+        ImGui::SetNextWindowPos(ImVec2(0, 0));
+
         // 渲染GUI
         ImGui::Begin("Updater");
 
@@ -126,8 +135,6 @@ int main(int, char **)
 
         // 渲染
         ImGui::Render();
-        int display_w, display_h;
-        glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
         glClearColor(0.45f, 0.55f, 0.60f, 1.00f);
         glClear(GL_COLOR_BUFFER_BIT);

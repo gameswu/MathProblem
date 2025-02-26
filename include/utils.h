@@ -1,18 +1,58 @@
-// utils.h
 #pragma once
 
-#include <vector>
+#include <numeric>
 
-/* 寻找`num`的所有`digit`位数的因数
- * @param num: 待寻找因数的数
- * @param digit: 因数的位数
- */
-std::vector<int> find_factors(int num, int digit);
+// 分数结构体
+template <typename T>
+struct Fraction
+{
+    T numerator;
+    T denominator;
 
-/* 随机寻找`num`的一个`digit`位数的因数
- * @param num: 待寻找因数的数
- * @param digit: 因数的位数
- *
- * Note: 如果找不到则返回-1
- */
-int find_a_factor(int num, int digit);
+    void simplify()
+    {
+        T gcd = std::gcd(numerator, denominator);
+        numerator /= gcd;
+        denominator /= gcd;
+    }
+};
+
+template <typename T>
+Fraction<T> operator+(const Fraction<T> &lhs, const Fraction<T> &rhs)
+{
+    Fraction<T> res;
+    res.numerator = lhs.numerator * rhs.denominator + rhs.numerator * lhs.denominator;
+    res.denominator = lhs.denominator * rhs.denominator;
+    res.simplify();
+    return res;
+}
+
+template <typename T>
+Fraction<T> operator-(const Fraction<T> &lhs, const Fraction<T> &rhs)
+{
+    Fraction<T> res;
+    res.numerator = lhs.numerator * rhs.denominator - rhs.numerator * lhs.denominator;
+    res.denominator = lhs.denominator * rhs.denominator;
+    res.simplify();
+    return res;
+}
+
+template <typename T>
+Fraction<T> operator*(const Fraction<T> &lhs, const Fraction<T> &rhs)
+{
+    Fraction<T> res;
+    res.numerator = lhs.numerator * rhs.numerator;
+    res.denominator = lhs.denominator * rhs.denominator;
+    res.simplify();
+    return res;
+}
+
+template <typename T>
+Fraction<T> operator/(const Fraction<T> &lhs, const Fraction<T> &rhs)
+{
+    Fraction<T> res;
+    res.numerator = lhs.numerator * rhs.denominator;
+    res.denominator = lhs.denominator * rhs.numerator;
+    res.simplify();
+    return res;
+}

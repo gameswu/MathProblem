@@ -10,8 +10,8 @@ class Problem
 {
 public:
     Problem();
-    virtual std::string getProblem() const = 0;
-    virtual std::string getAnswer() const = 0;
+    virtual std::string getProblem() const { return problem; }
+    virtual std::string getAnswer() const { return answer; }
     void setFormat(int format)
     {
         this->format = format;
@@ -34,16 +34,6 @@ class AddSubProblem : public Problem
 public:
     AddSubProblem(int nums, int maxNum, int maxRes, int minRes, int format);
 
-    std::string getProblem() const override
-    {
-        return problem;
-    }
-
-    std::string getAnswer() const override
-    {
-        return answer;
-    }
-
     int nums;   // 题目中的数字个数
     int maxNum; // 题目中的数字最大值
     int maxRes; // 题目中的结果最大值
@@ -61,26 +51,31 @@ class MulDivProblem : public Problem
 public:
     MulDivProblem(int flags, int firstDigits, int secondDigits, int format);
 
-    std::string getProblem() const override
-    {
-        return problem;
-    }
-
-    std::string getAnswer() const override
-    {
-        return answer;
-    }
-
     enum MulDivFlags
     {
         IS_DIV = 1, // 是否为除法题目
         HAS_REM = 2 // 是否带余数
     };
 
-    int flags; // 题目类型标志
-    // int nums;  // 题目中的数字个数 弃用，固定为2
+    int flags;        // 题目类型标志
     int firstDigits;  // 第一个数的位数
     int secondDigits; // 第二个数的位数
+
+private:
+    void generateProblem() override;
+};
+
+/*
+ * 分数加减法题目
+ */
+class FractionAddSubProblem : public Problem
+{
+public:
+    FractionAddSubProblem(int nums, int maxDenominator, int maxNumerator, int format);
+
+    int nums;           // 题目中的分数个数
+    int maxDenominator; // 题目中的分母最大值
+    int maxNumerator;   // 题目中的分子最大值
 
 private:
     void generateProblem() override;

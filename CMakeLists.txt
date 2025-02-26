@@ -41,7 +41,6 @@ add_executable(MathProblem WIN32
     include/file.cpp
     include/gui.cpp
     include/log.cpp
-    include/utils.cpp
     ${IMGUI_SRC}
 )
 
@@ -75,3 +74,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -static -static-libgcc -
 
 # 强制对 libstdc++、libgcc使用静态链接
 set(BUILD_SHARED_LIBS OFF)
+
+# 保留资源文件夹assets
+file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})

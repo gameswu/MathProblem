@@ -2,8 +2,6 @@
 
 这是一个用于练习算术的小程序，可以生成一些算术题目并支持`.txt`和`.md`格式语法的输出。
 
-![Build Status](https://github.com/gameswu/MathProblem/actions/workflows/build.yml/badge.svg)
-
 ## 从源码构建
 
 ### 环境要求

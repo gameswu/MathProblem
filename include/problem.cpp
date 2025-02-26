@@ -3,6 +3,7 @@
 #include "utils.h"
 #include <random>
 #include <cmath>
+#include <numeric>
 
 Problem::Problem()
 {
@@ -210,6 +211,135 @@ void MulDivProblem::generateProblem()
         }
         times++;
     } while (isOverFlow || times > LIMIT_TIMES || num2 == 0 || num1 < std::pow(10, firstDigits - 1) || num1 >= std::pow(10, firstDigits));
+
+    if (isOverFlow)
+    {
+        Logger::getInstance().log("In Problem " + prob + ": Overflow in numerical calculations", WARNING);
+    }
+    else if (times > LIMIT_TIMES)
+    {
+        Logger::getInstance().log("In Problem " + prob + ": Failed to generate in LIMIT_TIMES", ERROR);
+    }
+
+    problem = prob;
+    answer = ans;
+}
+
+FractionAddSubProblem::FractionAddSubProblem(int nums, int maxDenominator, int maxNumerator, int format)
+{
+    this->nums = nums;
+    this->maxDenominator = maxDenominator;
+    this->maxNumerator = maxNumerator;
+    this->format = format;
+    generateProblem();
+}
+
+/* 生成分数加减法题目
+ *
+ * 在UnicodeMath和LaTeX两种格式下输出格式分别为：
+ * UnicodeMath: 1/2 + 1/3 =
+ * LaTeX: \frac{1}{2}+\frac{1}{3}=
+ */
+void FractionAddSubProblem::generateProblem()
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> DenDist(2, maxDenominator);
+    std::uniform_int_distribution<> NumDist(1, maxNumerator);
+    std::uniform_int_distribution<> opDist(0, 1);
+
+    std::string prob = "";
+    std::string ans = "";
+
+    Fraction<int> res{0, 1};
+    Fraction<int> frac;
+    int den = 0;
+    int num = 0;
+    int op = 0;
+    bool isOverFlow = false;
+    int times = 0;
+
+    do
+    {
+        res = {0, 1};
+        prob = "";
+        ans = "";
+        isOverFlow = false;
+        for (int i = 0; i < nums; i++)
+        {
+            den = DenDist(gen);
+            do
+            {
+                num = NumDist(gen);
+            } while (std::gcd(num, den) != 1);
+            frac = {num, den};
+            op = opDist(gen);
+            if (i == 0)
+            {
+                if (format == 0)
+                {
+                    prob += std::to_string(num) + "/" + std::to_string(den);
+                }
+                else
+                {
+                    prob += "\\frac{" + std::to_string(num) + "}{" + std::to_string(den) + "}";
+                }
+                res = frac;
+            }
+            else
+            {
+                if (op == 0)
+                {
+                    if (format == 0)
+                    {
+                        prob += " + " + std::to_string(num) + "/" + std::to_string(den);
+                    }
+                    else
+                    {
+                        prob += "+\\frac{" + std::to_string(num) + "}{" + std::to_string(den) + "}";
+                    }
+                    res = res + frac;
+                }
+                else
+                {
+                    if (format == 0)
+                    {
+                        prob += " - " + std::to_string(num) + "/" + std::to_string(den);
+                    }
+                    else
+                    {
+                        prob += "-\\frac{" + std::to_string(num) + "}{" + std::to_string(den) + "}";
+                    }
+                    res = res - frac;
+                }
+            }
+        }
+        if (format == 0)
+        {
+            prob += " = ";
+            if (res.denominator == 1)
+            {
+                ans = std::to_string(res.numerator);
+            }
+            else
+            {
+                ans = std::to_string(res.numerator) + "/" + std::to_string(res.denominator);
+            }
+        }
+        else
+        {
+            prob += "=";
+            if (res.denominator == 1)
+            {
+                ans = std::to_string(res.numerator);
+            }
+            else
+            {
+                ans = "\\frac{" + std::to_string(res.numerator) + "}{" + std::to_string(res.denominator) + "}";
+            }
+        }
+        times++;
+    } while (res.numerator < 0 || res.denominator < 0 || isOverFlow || times > LIMIT_TIMES);
 
     if (isOverFlow)
     {

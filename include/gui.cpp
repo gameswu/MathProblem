@@ -13,11 +13,11 @@ GUI::GUI()
     problemTypes.push_back("无");
     problemTypes.push_back("加减法");
     problemTypes.push_back("乘除法");
+    problemTypes.push_back("分数加减法");
     // 可以添加更多题型
 
     outputFormats.push_back("UnicodeMath");
     outputFormats.push_back("LaTeX");
-    // 可以添加更多输出格式
 
     strcpy(filePath, "output.txt"); // 默认文件路径
 }
@@ -69,9 +69,9 @@ void GUI::render()
         {
             currentProblem = std::make_unique<MulDivProblem>(0, 2, 2, selectedFormat);
         }
-        else
+        else if (selectedProblemType == 3)
         {
-            currentProblem.reset();
+            currentProblem = std::make_unique<FractionAddSubProblem>(2, 10, 10, selectedFormat);
         }
         // 可以添加更多题型的实例化逻辑
     }
@@ -157,6 +157,12 @@ void GUI::renderProblemOptions()
             ImGui::InputInt("第一个数的位数", &mulDivProblem->firstDigits);
             ImGui::InputInt("第二个数的位数", &mulDivProblem->secondDigits);
         }
+        else if (auto fractionAddSubProblem = dynamic_cast<FractionAddSubProblem *>(currentProblem.get()))
+        {
+            ImGui::InputInt("数字个数", &fractionAddSubProblem->nums);
+            ImGui::InputInt("分母最大值", &fractionAddSubProblem->maxDenominator);
+            ImGui::InputInt("分子最大值", &fractionAddSubProblem->maxNumerator);
+        }
         // 可以添加更多题型的选项渲染逻辑
     }
 }
@@ -184,6 +190,13 @@ void GUI::generateProblems()
                                                  dynamic_cast<MulDivProblem *>(currentProblem.get())->firstDigits,
                                                  dynamic_cast<MulDivProblem *>(currentProblem.get())->secondDigits,
                                                  selectedFormat));
+        }
+        else if (selectedProblemType == 3)
+        {
+            problems.push_back(new FractionAddSubProblem(dynamic_cast<FractionAddSubProblem *>(currentProblem.get())->nums,
+                                                         dynamic_cast<FractionAddSubProblem *>(currentProblem.get())->maxDenominator,
+                                                         dynamic_cast<FractionAddSubProblem *>(currentProblem.get())->maxNumerator,
+                                                         selectedFormat));
         }
         // 可以添加更多题型的生成逻辑
     }
